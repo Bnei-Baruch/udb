@@ -71,6 +71,17 @@ func GetTrimmer(c *gin.Context) {
 	}
 }
 
+func GetTrimmed(c *gin.Context) {
+	udb := c.MustGet("UDB").(*gorm.DB)
+	var t []models.Trimmer
+	if err := udb.Where("wfstatus ->> 'removed' = ?", "false").Find(&t).Error; err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		fmt.Println(err)
+	} else {
+		c.JSON(http.StatusOK, t)
+	}
+}
+
 func PutTrimmer(c *gin.Context) {
 	var t models.Trimmer
 	if c.BindJSON(&t) == nil {
@@ -78,6 +89,27 @@ func PutTrimmer(c *gin.Context) {
 		udb.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&t)
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	}
+}
+
+func TrimmerStatusValue(c *gin.Context) {
+	id := c.Params.ByName("id")
+	key := c.Params.ByName("key")
+	val := c.Query("value")
+	udb := c.MustGet("UDB").(*gorm.DB)
+	udb.Exec("UPDATE trimmer SET wfstatus = wfstatus || json_build_object($2::text, $3::bool)::jsonb WHERE trim_id=$1", id, key, val)
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func RemoveTrimmer(c *gin.Context) {
+	id := c.Params.ByName("id")
+	udb := c.MustGet("UDB").(*gorm.DB)
+	var t models.Trimmer
+	if err := udb.Unscoped().Where("trim_id = ?", id).Delete(&t).Error; err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		fmt.Println(err)
+	} else {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	}
 }
