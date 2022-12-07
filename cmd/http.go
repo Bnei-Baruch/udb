@@ -19,6 +19,9 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+var err error
+
 func InitHTTP() {
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	log.Infof("Starting UDB API server version %s", version.Version)
@@ -31,14 +34,14 @@ func InitHTTP() {
 		viper.GetString("db.name"),
 		viper.GetString("db.port"),
 	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: gorm_logrus.New().LogMode(logger.Info),
 	})
 	if err != nil {
 		log.Infof("UDB connection error: %s", err)
 		return
 	}
-	db.AutoMigrate()
+	DB.AutoMigrate()
 
 	// cors
 	corsConfig := cors.DefaultConfig()
@@ -66,7 +69,7 @@ func InitHTTP() {
 	router := gin.New()
 	router.Use(
 		utils.MdbLoggerMiddleware(),
-		utils.EnvMiddleware(db, oidcIDTokenVerifier),
+		utils.EnvMiddleware(DB, oidcIDTokenVerifier),
 		utils.ErrorHandlingMiddleware(),
 		utils.AuthenticationMiddleware(),
 		cors.New(corsConfig),

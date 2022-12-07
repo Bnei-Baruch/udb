@@ -21,5 +21,6 @@ func Exec() {
 		fmt.Println("Could not read config, using: ", viper.ConfigFileUsed(), err.Error())
 		return
 	}
+	InitMQTT()
 	InitHTTP()
 }

@@ -29,7 +29,7 @@ func MdbLoggerMiddleware() gin.HandlerFunc {
 			"latency":    time.Now().Sub(start),
 			"ip":         c.ClientIP(),
 			"user-agent": c.Request.UserAgent(),
-		}).Info()
+		}).Info("HTTP: request")
 	}
 }
 
