@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Bnei-Baruch/udb/models"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -21,6 +22,8 @@ func Exec() {
 		fmt.Println("Could not read config, using: ", viper.ConfigFileUsed(), err.Error())
 		return
 	}
+
+	models.InitDB()
 	InitMQTT()
 	InitHTTP()
 }

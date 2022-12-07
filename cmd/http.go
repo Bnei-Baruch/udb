@@ -2,46 +2,22 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/Bnei-Baruch/udb/api"
+	"github.com/Bnei-Baruch/udb/models"
 	"github.com/Bnei-Baruch/udb/utils"
 	"github.com/Bnei-Baruch/udb/version"
 	"github.com/spf13/viper"
-	"gorm.io/gorm/logger"
 	"net/http"
 
 	"github.com/coreos/go-oidc"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/onrik/gorm-logrus"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
-
-var DB *gorm.DB
-var err error
 
 func InitHTTP() {
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	log.Infof("Starting UDB API server version %s", version.Version)
-
-	log.Info("Setting up connection to UDB")
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jerusalem",
-		viper.GetString("db.host"),
-		viper.GetString("db.user"),
-		viper.GetString("db.password"),
-		viper.GetString("db.name"),
-		viper.GetString("db.port"),
-	)
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gorm_logrus.New().LogMode(logger.Info),
-	})
-	if err != nil {
-		log.Infof("UDB connection error: %s", err)
-		return
-	}
-	DB.AutoMigrate()
 
 	// cors
 	corsConfig := cors.DefaultConfig()
@@ -69,7 +45,7 @@ func InitHTTP() {
 	router := gin.New()
 	router.Use(
 		utils.MdbLoggerMiddleware(),
-		utils.EnvMiddleware(DB, oidcIDTokenVerifier),
+		utils.EnvMiddleware(models.DB, oidcIDTokenVerifier),
 		utils.ErrorHandlingMiddleware(),
 		utils.AuthenticationMiddleware(),
 		cors.New(corsConfig),
