@@ -59,6 +59,19 @@ func GetIngest(c *gin.Context) {
 	}
 }
 
+func FindTrimmer(c *gin.Context) {
+	key := c.Query("key")
+	val := c.Query("value")
+	udb := c.MustGet("UDB").(*gorm.DB)
+	var t []models.Trimmer
+	if err := udb.Where(key+" LIKE ?", "%"+val+"%").Find(&t).Error; err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		fmt.Println(err)
+	} else {
+		c.JSON(http.StatusOK, t)
+	}
+}
+
 func GetTrimmer(c *gin.Context) {
 	id := c.Params.ByName("id")
 	udb := c.MustGet("UDB").(*gorm.DB)

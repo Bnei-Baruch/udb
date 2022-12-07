@@ -8,6 +8,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.POST("/create_user", CreateUser)
 	router.GET("/ingest/:id", GetIngest)
 
+	router.GET("/trimmer/find", FindTrimmer)
 	router.GET("/trimmer/:id", GetTrimmer)
 	router.GET("/trim", GetTrimmed)
 	router.PUT("/trimmer/:id", PutTrimmer)

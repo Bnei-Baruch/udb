@@ -72,10 +72,11 @@ func InitMQTT() {
 
 	cliCfg.SetUsernamePassword(viper.GetString("mqtt.user"), []byte(viper.GetString("mqtt.password")))
 
-	debugLog := NewPahoLogAdapter(log.DebugLevel)
-
-	cliCfg.Debug = debugLog
-	cliCfg.PahoDebug = debugLog
+	if viper.GetString("mqtt.debug") == "true" {
+		debugLog := NewPahoLogAdapter(1)
+		cliCfg.Debug = debugLog
+		cliCfg.PahoDebug = debugLog
+	}
 
 	MQTT, err = autopaho.NewConnection(context.Background(), cliCfg)
 	if err != nil {
